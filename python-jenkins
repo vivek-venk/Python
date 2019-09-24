@@ -1,0 +1,50 @@
+from jenkinsapi.jenkins import Jenkins
+
+JENKINS_URL = 'http://<<ipaddress>>:port'
+JENKINS_USERNAME = '<<username>>'
+JENKINS_PASSWORD = '<<password>>'
+JOB_NAME = '<<Job Name in Jenkins>>'
+
+# This function creates a server instance which can be invoked before any other function call
+# Helps to define the configuration in a single place.
+def get_jenkins_instance():
+    server = Jenkins(JENKINS_URL, username=JENKINS_USERNAME, password=JENKINS_PASSWORD)
+    return server
+
+if __name__ == '__main__':
+    print get_jenkins_instance()
+
+# This Functino gets job details of each job that is running on the Jenkins instance.
+def get_job_details():
+    server = get_jenkins_instance()
+    for j in server.get_jobs():
+        job_instance = server.get_job(j[0])
+        print("*********************************")
+        print 'Job Name:%s' %(job_instance.name)
+        print 'Job Description:%s' %(job_instance.get_description())
+        print 'Is Job running:%s' %(job_instance.is_running())
+        print 'Is Job enabled:%s' %(job_instance.is_enabled())
+        print("*********************************")
+
+# Thsi function returns the plugins configured on a Jenkins instance.
+def get_plugin_details():
+    server = get_jenkins_instance()
+    for plugin in server.get_plugins().values():
+        print "Short Name:%s" %(plugin.shortName)
+        print "Long Name:%s" %(plugin.longName)
+        print "Version:%s" %(plugin.version)
+        print "URL:%s" %(plugin.url)
+        print "Active:%s" %(plugin.active)
+        print "Enabled:%s" %(plugin.enabled)
+
+def getSCMInfroFromLatestGoodBuild(url, jobName, username=JENKINS_USERNAME, password=JENKINS_PASSWORD):
+    J = Jenkins(url, username, password)
+    job = J[jobName]
+    lgb = job.get_last_good_build()
+    print("Job Name: "+ str(job))
+    print("Build Number: "+ str(lgb))
+    return lgb.get_revision()
+
+get_job_details()
+get_plugin_details()
+getSCMInfroFromLatestGoodBuild(JENKINS_URL, JOB_NAME, JENKINS_USERNAME, JENKINS_PASSWORD)
